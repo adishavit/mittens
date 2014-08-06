@@ -8,7 +8,7 @@ namespace mittens
    //////////////////////////////////////////////////////////////////////////
 
    template <typename FailCodeType_ = int>
-   class UnCatcher
+   class UnHandler
    {
    public:
       typedef FailCodeType_ FailCodeType;
@@ -30,12 +30,12 @@ namespace mittens
    //////////////////////////////////////////////////////////////////////////
 
    template <typename ExceptionType, typename NestedHandler>
-   class GenericExceptionCatcher
+   class GenericExceptionHandler
    {
    public:
       typedef typename NestedHandler::FailCodeType FailCodeType;
 
-      GenericExceptionCatcher(FailCodeType failCode, NestedHandler const& nestedHandler):
+      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler):
          failCode_(failCode),
          nestedHandler(nestedHandler)
       {}
@@ -78,7 +78,7 @@ namespace mittens
 
 
    template <typename ExceptionType, typename NestedHandler>
-   inline GenericExceptionCatcher<ExceptionType, NestedHandler> generic_catcher(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
-   {  return GenericExceptionCatcher<ExceptionType, NestedHandler>(failCode, nestedHandler); }
+   inline GenericExceptionHandler<ExceptionType, NestedHandler> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
+   {  return GenericExceptionHandler<ExceptionType, NestedHandler>(failCode, nestedHandler); }
 
 }

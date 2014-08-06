@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_SUITE(BadAllocCatcher_Tests)
 BOOST_AUTO_TEST_CASE(Test_that_bad_alloc_catcher_works)
 {
    {
-      auto catcher = bad_alloc_catcher(EXIT_FAILURE, UnCatcher<int>());
+      auto catcher = bad_alloc_catcher(EXIT_FAILURE, UnHandler<int>());
       try
       {
          throw_bad_alloc();

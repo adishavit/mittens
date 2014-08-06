@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_SUITE(StdExceptionCatcher_Tests)
 BOOST_AUTO_TEST_CASE(Test_that_std_exception_catcher_works)
 {
    {
-      auto catcher = std_exception_catcher(EXIT_FAILURE, UnCatcher<int>());
+      auto catcher = std_exception_catcher(EXIT_FAILURE, UnHandler<int>());
       try
       {
          throw_std_exception();
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(Internal_catch_handler_std_exception_catcher_works)
       }
       catch (...)
       {
-         BOOST_CHECK_EQUAL(EXIT_FAILURE, std_exception_catcher(EXIT_FAILURE, UnCatcher<int>()).handleException());
+         BOOST_CHECK_EQUAL(EXIT_FAILURE, std_exception_catcher(EXIT_FAILURE, UnHandler<int>()).handleException());
       }
    }
 }
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(std_exception_catcher_does_not_catch_non_std_exception)
 
 BOOST_AUTO_TEST_CASE(std_exception_catcher_catches_bad_alloc_exception)
 {
-   auto catcher = std_exception_catcher(EXIT_FAILURE, UnCatcher<int>());
+   auto catcher = std_exception_catcher(EXIT_FAILURE, UnHandler<int>());
    try
    {
       throw_bad_alloc();

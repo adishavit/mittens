@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(GenericExceptionCatcher_Tests)
 BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
 {
    {
-      auto allCatcher = GenericExceptionCatcher<void, UnCatcher<>>(EXIT_FAILURE, UnCatcher<>()); // external handler
+      auto allCatcher = GenericExceptionHandler<void, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_int();
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
    }
 
    {
-      auto stdExceptionCatcher = GenericExceptionCatcher<std::exception, UnCatcher<>>(EXIT_FAILURE, UnCatcher<>()); // external handler
+      auto stdExceptionCatcher = GenericExceptionHandler<std::exception, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_std_exception();
@@ -41,8 +41,8 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
    }
 
    {
-      auto allCatcher = GenericExceptionCatcher<void, UnCatcher<>>(EXIT_FAILURE, UnCatcher<>()); // external handler
-      auto stdExceptionCatcher = GenericExceptionCatcher<std::exception, UnCatcher<>>(EXIT_FAILURE, UnCatcher<>()); // external handler
+      auto allCatcher = GenericExceptionHandler<void, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
+      auto stdExceptionCatcher = GenericExceptionHandler<std::exception, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_int();
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
 
 BOOST_AUTO_TEST_CASE(generic_catcher_first_test)
 {
-   auto allCatcher = generic_catcher<void>(EXIT_FAILURE, UnCatcher<>());
+   auto allCatcher = generic_handler<void>(EXIT_FAILURE, UnHandler<>());
    {
       try
       {
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(generic_catcher_first_test)
       }
    }
 
-   auto stdExceptionCatcher = generic_catcher<std::exception>(EXIT_FAILURE, UnCatcher<>()); //
+   auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, UnHandler<>()); //
    {
       try
       {
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(generic_catcher_first_test)
 
    {
       // composition test
-      auto catcher = generic_catcher<void>(-1, stdExceptionCatcher);
+      auto catcher = generic_handler<void>(-1, stdExceptionCatcher);
 
       try
       {

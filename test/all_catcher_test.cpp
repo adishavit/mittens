@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(AllCatcher_Tests)
 BOOST_AUTO_TEST_CASE(Test_that_all_catcher_works)
 {
    {
-      auto catcher = all_catcher(EXIT_FAILURE, UnCatcher<int>());
+      auto catcher = all_catcher(EXIT_FAILURE, UnHandler<int>());
       try
       {
          throw_int();
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(Internal_catch_handler_all_catcher_works)
       }
       catch (...)
       {
-         BOOST_CHECK_EQUAL(EXIT_FAILURE, all_catcher(EXIT_FAILURE, UnCatcher<int>()).handleException());
+         BOOST_CHECK_EQUAL(EXIT_FAILURE, all_catcher(EXIT_FAILURE, UnHandler<int>()).handleException());
       }
    }
 }
