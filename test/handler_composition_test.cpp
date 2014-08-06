@@ -66,11 +66,13 @@ BOOST_AUTO_TEST_CASE(CatcherComposition_with_3_catchers_works)
    }
 }
 
-/*
 BOOST_AUTO_TEST_CASE(CatcherComposition_with_custom_action_works)
 {
    int hit=0;
-   auto catcher = all_catcher(-1, std_exception_handler(-2, bad_alloc_handler(-3,[&hit](std::exception&){ ++hit; }), [&hit](std::exception&){ ++hit; }), [&hit](){ ++hit; }); // external handler
+   auto catcher = all_catcher(             -1, [&hit](){ ++hit; }, 
+                     std_exception_handler(-2, [&hit](std::exception&){ ++hit; }, 
+                        bad_alloc_handler( -3, [&hit](std::bad_alloc&){ ++hit; }, 
+                           UnHandler<>()))); 
 
    try
    {
@@ -106,7 +108,36 @@ BOOST_AUTO_TEST_CASE(CatcherComposition_with_custom_action_works)
    }
 }
 
-*/
+
+BOOST_AUTO_TEST_CASE(Catch_internal_CatcherComposition_with_custom_action_works)
+{
+   int hit=0;
+   for (int i=0; i<3; ++i)
+   {
+      try
+      {
+         switch(i)
+         {
+         case 0: throw_bad_alloc();
+         case 1: throw_std_exception();
+         case 2: throw_int();
+         }
+      }
+      catch (...)
+      {
+         auto catcher = all_catcher(             2, [&hit](){ ++hit; }, 
+                           std_exception_handler(1, [&hit](std::exception&){ ++hit; }, 
+                              bad_alloc_handler( 0, [&hit](std::bad_alloc&){ ++hit; }, 
+                                 UnHandler<>()))); 
+
+         BOOST_CHECK_EQUAL(i,hit);
+         BOOST_CHECK_EQUAL(i, catcher.handleException());
+         BOOST_CHECK_EQUAL(i+1,hit);
+      }
+   }
+}
+
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
