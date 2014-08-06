@@ -93,9 +93,12 @@ namespace mittens
    inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, Callable customAction, NestedHandler const& nestedHandler)
    {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction); }
 
-
    template <typename ExceptionType, typename NestedHandler>
    inline GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
    {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler); }
+
+   template <typename ExceptionType, typename Callable, typename FailCodeType>
+   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, Callable> generic_handler(FailCodeType failCode, Callable customAction)
+   {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>()); }
 
 }

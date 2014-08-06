@@ -16,6 +16,10 @@ namespace mittens
    inline GenericExceptionHandler<void, NestedHandler> all_catcher(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
    {  return generic_handler<void>(failCode, nestedHandler); }
 
+   template <typename Callable, typename FailCodeType>
+   inline GenericExceptionHandler<void, UnHandler<FailCodeType>, Callable> all_catcher(FailCodeType failCode, Callable customAction)
+   {  return generic_handler<void>(failCode, customAction); }
+
    template <typename FailCodeType>
    inline GenericExceptionHandler<void, UnHandler<FailCodeType>> all_catcher(FailCodeType failCode)
    {  return all_catcher(failCode, UnHandler<FailCodeType>()); }
@@ -30,6 +34,10 @@ namespace mittens
    inline GenericExceptionHandler<std::exception, NestedHandler> std_exception_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
    {  return generic_handler<std::exception>(failCode, nestedHandler); }
 
+   template <typename Callable, typename FailCodeType>
+   inline GenericExceptionHandler<std::exception, UnHandler<FailCodeType>, Callable> std_exception_handler(FailCodeType failCode, Callable customAction)
+   {  return generic_handler<std::exception>(failCode, customAction); }
+
    template <typename FailCodeType>
    inline GenericExceptionHandler<std::exception, UnHandler<FailCodeType>> std_exception_handler(FailCodeType failCode)
    {  return std_exception_handler(failCode, UnHandler<FailCodeType>()); }
@@ -43,6 +51,10 @@ namespace mittens
    template <typename NestedHandler>
    inline GenericExceptionHandler<std::bad_alloc, NestedHandler> bad_alloc_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
    {  return generic_handler<std::bad_alloc>(failCode, nestedHandler); }
+
+   template <typename Callable, typename FailCodeType>
+   inline GenericExceptionHandler<std::bad_alloc, UnHandler<FailCodeType>, Callable> bad_alloc_handler(FailCodeType failCode, Callable customAction)
+   {  return generic_handler<std::bad_alloc>(failCode, customAction); }
 
    template <typename FailCodeType>
    inline GenericExceptionHandler<std::bad_alloc, UnHandler<FailCodeType>> bad_alloc_handler(FailCodeType failCode)

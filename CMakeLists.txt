@@ -22,3 +22,7 @@ if(MSVC)
    add_definitions(/D_SCL_SECURE_NO_WARNINGS)
    add_definitions(/DNOMINMAX)
 endif(MSVC)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+add_subdirectory (examples)
