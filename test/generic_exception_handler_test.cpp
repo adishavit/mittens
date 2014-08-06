@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_SUITE(GenericExceptionCatcher_Tests)
 
 BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
 {
+   auto allCatcher = GenericExceptionHandler<void, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); 
    {
-      auto allCatcher = GenericExceptionHandler<void, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_int();
@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
       }
    }
 
+   auto stdExceptionCatcher = GenericExceptionHandler<std::exception, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); 
    {
-      auto stdExceptionCatcher = GenericExceptionHandler<std::exception, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_std_exception();
@@ -41,8 +41,6 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
    }
 
    {
-      auto allCatcher = GenericExceptionHandler<void, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
-      auto stdExceptionCatcher = GenericExceptionHandler<std::exception, UnHandler<>>(EXIT_FAILURE, UnHandler<>()); // external handler
       try
       {
          throw_int();
@@ -55,7 +53,8 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_first_test)
    }
 }
 
-BOOST_AUTO_TEST_CASE(generic_catcher_first_test)
+
+BOOST_AUTO_TEST_CASE(generic_catcher_simple_tests)
 {
    auto allCatcher = generic_handler<void>(EXIT_FAILURE, UnHandler<>());
    {
@@ -106,9 +105,44 @@ BOOST_AUTO_TEST_CASE(generic_catcher_first_test)
          BOOST_CHECK_EQUAL(-1, catcher.handleException());
       }
    }
-
-
 }
+
+BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action)
+{
+   int hit=0;
+   {
+      auto allCatcher = generic_handler<void>(EXIT_FAILURE, UnHandler<>(),[&hit](){ ++hit; });
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(0,hit);
+            BOOST_CHECK_EQUAL(EXIT_FAILURE, allCatcher.handleException());
+            BOOST_CHECK_EQUAL(1,hit);
+         }
+      }
+   }
+
+   {
+      auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, UnHandler<>(),[&hit](std::exception&){ ++hit; });
+      {
+         try
+         {
+            throw_std_exception();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(1,hit);
+            BOOST_CHECK_EQUAL(EXIT_FAILURE, stdExceptionCatcher.handleException());
+            BOOST_CHECK_EQUAL(2,hit);
+         }
+      }
+   }
+}
+
 
 
 BOOST_AUTO_TEST_SUITE_END()

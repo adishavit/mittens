@@ -1,3 +1,5 @@
+#include <iostream>
+#include <typeinfo>
 #include <boost/test/unit_test.hpp>
 
 //////////////////////////////////////////////////////////////////////////
@@ -113,6 +115,21 @@ BOOST_AUTO_TEST_CASE(std_exception_catcher_catches_bad_alloc_exception)
    catch (...)
    {
       BOOST_CHECK_EQUAL(EXIT_FAILURE, catcher.handleException());
+   }
+}
+
+BOOST_AUTO_TEST_CASE(std_exception_catcher_with_custom_action)
+{
+   auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, UnHandler<>(),[](std::exception& e){ std::cout << e.what() << std::endl; });
+   {
+      try
+      {
+         throw_std_exception();
+      }
+      catch (...)
+      {
+         BOOST_CHECK_EQUAL(EXIT_FAILURE, stdExceptionCatcher.handleException());
+      }
    }
 }
 

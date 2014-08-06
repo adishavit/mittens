@@ -21,23 +21,33 @@ namespace mittens
 
 
    //////////////////////////////////////////////////////////////////////////
-
+   // Helper utils
    namespace
    {
       template <bool v> struct Bool2Type { static const bool value = v; };  // anonymous helper function
    }
 
+   // Helper default no-action type
+   template <typename ExceptionType = void>
+   struct DefaultNoAction
+   {  void operator()(ExceptionType&){} };
+
+   template <>
+   struct DefaultNoAction<void>
+   {  void operator()(){} };
+
    //////////////////////////////////////////////////////////////////////////
 
-   template <typename ExceptionType, typename NestedHandler>
+   template <typename ExceptionType, typename NestedHandler, typename Callable = DefaultNoAction<ExceptionType> >
    class GenericExceptionHandler
    {
    public:
       typedef typename NestedHandler::FailCodeType FailCodeType;
 
-      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler):
+      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction = Callable()):
          failCode_(failCode),
-         nestedHandler(nestedHandler)
+         nestedHandler(nestedHandler),
+         customAction_(customAction)
       {}
 
       FailCodeType handleException() { return handleException_(Bool2Type<std::is_same<ExceptionType, void>::value>()); }
@@ -50,9 +60,9 @@ namespace mittens
          {
             return nestedHandler.handleException();
          }
-         catch (ExceptionType& /*e*/)
+         catch (ExceptionType& e)
          {
-            //std::cout << "Caught std::exception: " << e.what() << std::endl;
+            try { customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
             return failCode_;
          }
       }
@@ -66,7 +76,7 @@ namespace mittens
          }
          catch (...)
          {
-            //std::cout << "Caught std::exception: " << e.what() << std::endl;
+            try { customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
             return failCode_;
          }
       }
@@ -74,11 +84,17 @@ namespace mittens
    private:
       FailCodeType failCode_;
       NestedHandler nestedHandler;
+      Callable customAction_; 
    };
 
 
+   template <typename ExceptionType, typename NestedHandler, typename Callable>
+   inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction)
+   {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction); }
+
+
    template <typename ExceptionType, typename NestedHandler>
-   inline GenericExceptionHandler<ExceptionType, NestedHandler> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
-   {  return GenericExceptionHandler<ExceptionType, NestedHandler>(failCode, nestedHandler); }
+   inline GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
+   {  return GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>>(failCode, nestedHandler, DefaultNoAction<ExceptionType>()); }
 
 }
