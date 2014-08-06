@@ -2,9 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // Tested API
-#include "common_catchers.hpp"
-#include "common_catchers.hpp"
-
+#include "common_handlers.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 #include "exception_generators.hpp"
@@ -16,7 +14,7 @@ BOOST_AUTO_TEST_SUITE(CatcherComposition_Tests)
 
 BOOST_AUTO_TEST_CASE(CatcherComposition_works)
 {
-   auto catcher = all_catcher(-1, std_exception_catcher(-2)); // external handler
+   auto catcher = all_catcher(-1, std_exception_handler(-2)); // external handler
    try
    {
       throw_std_exception();
@@ -38,7 +36,7 @@ BOOST_AUTO_TEST_CASE(CatcherComposition_works)
 
 BOOST_AUTO_TEST_CASE(CatcherComposition_with_3_catchers_works)
 {
-   auto catcher = all_catcher(-1, std_exception_catcher(-2, bad_alloc_catcher(-3))); // external handler
+   auto catcher = all_catcher(-1, std_exception_handler(-2, bad_alloc_handler(-3))); // external handler
 
    try
    {

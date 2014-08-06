@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 // Tested API
-#include "common_catchers.hpp"
+#include "common_handlers.hpp"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_SUITE(BadAllocCatcher_Tests)
 BOOST_AUTO_TEST_CASE(Test_that_bad_alloc_catcher_works)
 {
    {
-      auto catcher = bad_alloc_catcher(EXIT_FAILURE, UnHandler<int>());
+      auto catcher = bad_alloc_handler(EXIT_FAILURE, UnHandler<int>());
       try
       {
          throw_bad_alloc();
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(Test_that_bad_alloc_catcher_works)
       }
    }
    {
-      auto catcher = bad_alloc_catcher(EXIT_FAILURE); // default nest handler
+      auto catcher = bad_alloc_handler(EXIT_FAILURE); // default nest handler
       try
       {
          throw_bad_alloc();
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(Test_that_bad_alloc_catcher_works)
 BOOST_AUTO_TEST_CASE(bad_alloc_catcher_does_not_catch_non_bad_alloc_exception)
 {
    {
-      auto catcher = bad_alloc_catcher(EXIT_FAILURE);
+      auto catcher = bad_alloc_handler(EXIT_FAILURE);
       try
       {
          throw_int();
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(bad_alloc_catcher_does_not_catch_non_bad_alloc_exception)
       }
    }
    {
-      auto catcher = bad_alloc_catcher(EXIT_FAILURE);
+      auto catcher = bad_alloc_handler(EXIT_FAILURE);
       try
       {
          throw_std_exception();
