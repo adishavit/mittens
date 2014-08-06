@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "generic_exception_catcher.hpp"
+#include "generic_exception_handler.hpp"
 
 namespace mittens
 {
