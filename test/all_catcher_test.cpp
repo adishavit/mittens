@@ -84,4 +84,21 @@ BOOST_AUTO_TEST_CASE(Internal_catch_handler_all_catcher_works)
    }
 }
 
+BOOST_AUTO_TEST_CASE(Test_all_catcher_with_custom_action)
+{
+   int hit = 0;
+   auto catcher = all_catcher(EXIT_FAILURE, [&hit](){++hit;}, UnHandler<int>());
+   try
+   {
+      throw_int();
+   }
+   catch (...)
+   {
+      BOOST_CHECK_EQUAL(0, hit);
+      BOOST_CHECK_EQUAL(EXIT_FAILURE, catcher.handleException());
+      BOOST_CHECK_EQUAL(1, hit);
+   }
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

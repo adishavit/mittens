@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action)
 {
    int hit=0;
    {
-      auto allCatcher = generic_handler<void>(EXIT_FAILURE, UnHandler<>(),[&hit](){ ++hit; });
+      auto allCatcher = generic_handler<void>(EXIT_FAILURE, [&hit](){ ++hit; }, UnHandler<>());
       {
          try
          {
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action)
    }
 
    {
-      auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, UnHandler<>(),[&hit](std::exception&){ ++hit; });
+      auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, [&hit](std::exception&){ ++hit; }, UnHandler<>());
       {
          try
          {

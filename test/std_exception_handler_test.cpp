@@ -120,20 +120,19 @@ BOOST_AUTO_TEST_CASE(std_exception_catcher_catches_bad_alloc_exception)
 
 BOOST_AUTO_TEST_CASE(std_exception_catcher_with_custom_action)
 {
-   auto stdExceptionCatcher = generic_handler<std::exception>(EXIT_FAILURE, UnHandler<>(),[](std::exception& e){ std::cout << e.what() << std::endl; });
+   int hit = 0;
+   auto catcher = std_exception_handler(EXIT_FAILURE, [&hit](std::exception&){++hit;}, UnHandler<int>());
+   try
    {
-      try
-      {
-         throw_std_exception();
-      }
-      catch (...)
-      {
-         BOOST_CHECK_EQUAL(EXIT_FAILURE, stdExceptionCatcher.handleException());
-      }
+      throw_std_exception();
+   }
+   catch (...)
+   {
+      BOOST_CHECK_EQUAL(0, hit);
+      BOOST_CHECK_EQUAL(EXIT_FAILURE, catcher.handleException());
+      BOOST_CHECK_EQUAL(1, hit);
    }
 }
-
-
 
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include <type_traits> // for std::enable_if<> and std::is_same<>
+#include <type_traits> // for std::is_same<>
+#include <exception> // for std::is_same<>
 
 namespace mittens
 {
@@ -88,13 +89,13 @@ namespace mittens
    };
 
 
-   template <typename ExceptionType, typename NestedHandler, typename Callable>
-   inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction)
+   template <typename ExceptionType, typename Callable, typename NestedHandler>
+   inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, Callable customAction, NestedHandler const& nestedHandler)
    {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction); }
 
 
    template <typename ExceptionType, typename NestedHandler>
    inline GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
-   {  return GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>>(failCode, nestedHandler, DefaultNoAction<ExceptionType>()); }
+   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler); }
 
 }
