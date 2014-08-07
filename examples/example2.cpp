@@ -13,8 +13,8 @@ int main() try // Function try block
 catch (...)
 {
    using namespace mittens;
-   return   all_catcher(-1,              []()                { std::cout << "Caught unhandled exception of unknown type!"   << std::endl; }, 
+   return   all_catcher(             -1, []()                { std::cout << "Caught unhandled exception of unknown type!"   << std::endl; }, 
                std_exception_handler(-2, [](std::exception&e){ std::cout << "Caught unhandled std::exception: " << e.what() << std::endl; },
-                  bad_alloc_handler(-3,  [](std::bad_alloc&e){ std::cout << "Caught unhandled std::bad_alloc: " << e.what() << std::endl; }))).
+                  bad_alloc_handler( -3, [](std::bad_alloc&e){ std::cout << "Caught unhandled std::bad_alloc: " << e.what() << std::endl; }))).
                      handleException(); 
 }

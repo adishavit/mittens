@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <type_traits> // for std::is_same<>
+#include <functional>
+//#include <boost/utility/result_of.hpp>
 #include <exception> // for std::is_same<>
 
 namespace mittens
@@ -54,21 +56,28 @@ namespace mittens
       FailCodeType handleException() { return handleException_(Bool2Type<std::is_same<ExceptionType, void>::value>()); }
 
    private:
-      FailCodeType handleException_(Bool2Type<false>)
+      //////////////////////////////////////////////////////////////////////////
+      // What follows is lots of code and compile-time trickery to work-around 
+      // partial support for template specialization in VS2010
+      FailCodeType handleException_(Bool2Type<false> exceptionTypeNotVoid)
       {
          // Handle the case of ExceptionType != void
+         // This means 'e' can and needs to be passed to the custom-action (if the exception is caught)
          try
          {
             return nestedHandler.handleException();
          }
          catch (ExceptionType& e)
          {
-            try { customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
-            return failCode_;
+            // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
+            // then return the result of custom action as the fail code.
+            auto shouldReturnActionResult = Bool2Type< std::is_same< FailCodeType, decltype(customAction_(e)) >::value>();
+            return handleNonVoidExceptionType(shouldReturnActionResult);
+            e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
          }
       }
 
-      FailCodeType handleException_(Bool2Type<true>)
+      FailCodeType handleException_(Bool2Type<true> exceptionTypeIsVoid)
       {
          // Handle the case of ExceptionType == void: Interpret this as catch-all: '...'
          try
@@ -77,9 +86,55 @@ namespace mittens
          }
          catch (...)
          {
-            try { customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
-            return failCode_;
+            // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
+            // then return the result of custom action as the fail code.
+            auto shouldReturnActionResult = Bool2Type< std::is_same< FailCodeType, decltype(customAction_()) >::value>();
+            return handleVoidExceptionType(shouldReturnActionResult);
          }
+      }
+
+      FailCodeType handleVoidExceptionType(Bool2Type<true> shouldReturnFromCustomAction)
+      {
+         try { return customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+         return failCode_;
+      }
+
+      FailCodeType handleVoidExceptionType(Bool2Type<false> shouldReturnFromCustomAction)
+      {
+         try { customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+         return failCode_;
+      }
+
+      FailCodeType handleNonVoidExceptionType(Bool2Type<true> shouldReturnFromCustomAction)
+      {
+         try 
+         { 
+            try 
+            { throw; } // rethrow to get 'e' - can't pass it as argument since it may be of type void
+            catch (ExceptionType& e)
+            {
+               // now we have 'e':
+               try { return customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+               return failCode_;
+            }
+         } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
+         return failCode_;
+      }
+
+      FailCodeType handleNonVoidExceptionType(Bool2Type<false> shouldReturnFromCustomAction)
+      {
+         try 
+         { 
+            try 
+            { throw; } // rethrow to get 'e' - can't pass it as argument since it may be of type void
+            catch (ExceptionType& e)
+            {
+               // now we have 'e':
+               try { customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+               return failCode_;
+            }
+         } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
+         return failCode_;
       }
 
    private:

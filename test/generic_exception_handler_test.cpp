@@ -143,6 +143,65 @@ BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action)
    }
 }
 
+BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action_which_return_fail_code)
+{
+   int DEFAULT_RETURN_VALUE  = 0;
+   {
+      int EXPECTED_RETURN_VALUE = 1;
+      auto allCatcher = generic_handler<void>(DEFAULT_RETURN_VALUE, [&](){ return EXPECTED_RETURN_VALUE; });
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(EXPECTED_RETURN_VALUE, allCatcher.handleException());
+         }
+      }
+   }
+   {
+      auto allCatcher = generic_handler<void>(DEFAULT_RETURN_VALUE, [&](){ return 2.5; }); // labda retunrs a double != int, so default value should return
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(DEFAULT_RETURN_VALUE, allCatcher.handleException());
+         }
+      }
+   }
+   {
+      int EXPECTED_RETURN_VALUE = 1;
+      auto intCatcher = generic_handler<int>(DEFAULT_RETURN_VALUE, [&](int&){ return EXPECTED_RETURN_VALUE; });
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(EXPECTED_RETURN_VALUE, intCatcher.handleException());
+         }
+      }
+   }
+   {
+      auto intCatcher = generic_handler<int>(DEFAULT_RETURN_VALUE, [&](int&){ return 2.5; }); // labda retunrs a double != int, so default value should return
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(DEFAULT_RETURN_VALUE, intCatcher.handleException());
+         }
+      }
+   }
+}
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
