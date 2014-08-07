@@ -35,7 +35,7 @@ extern "C" HRESULT boundary_function() try         // Function try block
    throw_std_exception(); // ... code that throws ...
    return S_OK;
 }
-catch (...) { return boundaryExceptionGuard.handleException(); };
+catch (...) { return boundaryExceptionGuard(); };
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ extern "C" HRESULT another_boundary_function() try // Function try block
    throw_bad_alloc(); // ... code that throws ...
    return S_OK;
 }
-catch (...) { return boundaryExceptionGuard.handleException(); };
+catch (...) { return boundaryExceptionGuard(); };
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ extern "C" HRESULT yet_another_boundary_function() try // Function try block
 {
    throw my_hresult_error(); 
 }
-catch (...) { return boundaryExceptionGuard.handleException(); };
+catch (...) { return boundaryExceptionGuard(); };
 
 
 //////////////////////////////////////////////////////////////////////////

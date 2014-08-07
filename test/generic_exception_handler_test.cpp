@@ -202,6 +202,19 @@ BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action_which_return_fail_code)
    }
 }
 
-
+BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_paren_operator_test)
+{
+   auto allCatcher = generic_handler<void>(EXIT_FAILURE); 
+   {
+      try
+      {
+         throw_int();
+      }
+      catch (...)
+      {
+         BOOST_CHECK_EQUAL(EXIT_FAILURE, allCatcher());
+      }
+   }
+}
 
 BOOST_AUTO_TEST_SUITE_END()

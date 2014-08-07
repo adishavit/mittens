@@ -54,6 +54,7 @@ namespace mittens
       {}
 
       FailCodeType handleException() { return handleException_(Bool2Type<std::is_same<ExceptionType, void>::value>()); }
+      FailCodeType operator()() { return handleException(); }
 
    private:
       //////////////////////////////////////////////////////////////////////////
@@ -156,4 +157,7 @@ namespace mittens
    inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, Callable> generic_handler(FailCodeType failCode, Callable customAction)
    {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>()); }
 
+   template <typename ExceptionType, typename FailCodeType>
+   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, DefaultNoAction<ExceptionType>> generic_handler(FailCodeType failCode)
+   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), UnHandler<FailCodeType>()); }
 }

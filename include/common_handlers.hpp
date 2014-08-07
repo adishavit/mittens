@@ -22,7 +22,7 @@ namespace mittens
 
    template <typename FailCodeType>
    inline GenericExceptionHandler<void, UnHandler<FailCodeType>> all_catcher(FailCodeType failCode)
-   {  return all_catcher(failCode, UnHandler<FailCodeType>()); }
+   {  return generic_handler<void>(failCode); }
 
    //////////////////////////////////////////////////////////////////////////
    // std::exception handler maker
@@ -40,7 +40,7 @@ namespace mittens
 
    template <typename FailCodeType>
    inline GenericExceptionHandler<std::exception, UnHandler<FailCodeType>> std_exception_handler(FailCodeType failCode)
-   {  return std_exception_handler(failCode, UnHandler<FailCodeType>()); }
+   {  return generic_handler<std::exception>(failCode); }
 
    //////////////////////////////////////////////////////////////////////////
    // std::bad_alloc handler maker
@@ -58,6 +58,6 @@ namespace mittens
 
    template <typename FailCodeType>
    inline GenericExceptionHandler<std::bad_alloc, UnHandler<FailCodeType>> bad_alloc_handler(FailCodeType failCode)
-   {  return bad_alloc_handler(failCode, UnHandler<FailCodeType>()); }
+   {  return generic_handler<std::bad_alloc>(failCode); }
 }
 

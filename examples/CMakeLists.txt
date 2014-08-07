@@ -17,6 +17,9 @@ set_property(TARGET 2_custom_app_return_codes_with_messages PROPERTY FOLDER "exa
 add_executable (3_win32_hresult_boundary_function_example 3_win32_hresult_boundary_function_example.cpp)
 set_property(TARGET 3_win32_hresult_boundary_function_example PROPERTY FOLDER "examples")
 
+add_executable (4_lippincott_blog_post_example 4_lippincott_blog_post_example.cpp)
+set_property(TARGET 4_lippincott_blog_post_example PROPERTY FOLDER "examples")
+
 
 if(MSVC)
    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
