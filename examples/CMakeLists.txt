@@ -5,17 +5,17 @@ include_directories(../include)
 include_directories(../test)
 
 
-add_executable (example0 example0.cpp)
-set_property(TARGET example0 PROPERTY FOLDER "examples")
+add_executable (0_simplest_example 0_simplest_example.cpp)
+set_property(TARGET 0_simplest_example PROPERTY FOLDER "examples")
 
-add_executable (example1 example1.cpp)
-set_property(TARGET example1 PROPERTY FOLDER "examples")
+add_executable (1_custom_app_return_codes 1_custom_app_return_codes.cpp)
+set_property(TARGET 1_custom_app_return_codes PROPERTY FOLDER "examples")
 
-add_executable (example2 example2.cpp)
-set_property(TARGET example2 PROPERTY FOLDER "examples")
+add_executable (2_custom_app_return_codes_with_messages 2_custom_app_return_codes_with_messages.cpp)
+set_property(TARGET 2_custom_app_return_codes_with_messages PROPERTY FOLDER "examples")
 
-add_executable (example3 example3.cpp)
-set_property(TARGET example3 PROPERTY FOLDER "examples")
+add_executable (3_win32_hresult_boundary_function_example 3_win32_hresult_boundary_function_example.cpp)
+set_property(TARGET 3_win32_hresult_boundary_function_example PROPERTY FOLDER "examples")
 
 
 if(MSVC)

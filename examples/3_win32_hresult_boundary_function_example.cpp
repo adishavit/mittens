@@ -24,7 +24,7 @@ private:
 };
 
 auto boundaryExceptionGuard = all_catcher(E_UNEXPECTED, [](){ std::terminate(); }, 
-                                 generic_handler<my_hresult_error>(E_UNEXPECTED, [](my_hresult_error const& ex) { return ex.hresult();  },
+                                 generic_handler<my_hresult_error>(E_UNEXPECTED, [](my_hresult_error const& ex) { return ex.hresult();  }, // In case of my_hresult_error exception, return custom fail-code
                                     std_exception_handler(E_UNEXPECTED,
                                        bad_alloc_handler(E_OUTOFMEMORY))));
 
@@ -58,6 +58,7 @@ catch (...) { return boundaryExceptionGuard.handleException(); };
 
 
 //////////////////////////////////////////////////////////////////////////
+
 int main() 
 {
    using namespace std;
@@ -65,6 +66,6 @@ int main()
    cout << _com_error(boundary_function()).ErrorMessage() << endl;
    cout << _com_error(another_boundary_function()).ErrorMessage() << endl;   
    cout << _com_error(yet_another_boundary_function()).ErrorMessage() << endl;   
-   
+
    return EXIT_SUCCESS;
 }
