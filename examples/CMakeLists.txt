@@ -6,19 +6,24 @@ include_directories(../test)
 
 
 add_executable (0_simplest_example 0_simplest_example.cpp)
-set_property(TARGET 0_simplest_example PROPERTY FOLDER "examples")
+set_property(TARGET 0_simplest_example PROPERTY FOLDER "examples/general")
 
 add_executable (1_custom_app_return_codes 1_custom_app_return_codes.cpp)
-set_property(TARGET 1_custom_app_return_codes PROPERTY FOLDER "examples")
+set_property(TARGET 1_custom_app_return_codes PROPERTY FOLDER "examples/general")
 
 add_executable (2_custom_app_return_codes_with_messages 2_custom_app_return_codes_with_messages.cpp)
-set_property(TARGET 2_custom_app_return_codes_with_messages PROPERTY FOLDER "examples")
+set_property(TARGET 2_custom_app_return_codes_with_messages PROPERTY FOLDER "examples/general")
 
-add_executable (3_win32_hresult_boundary_function_example 3_win32_hresult_boundary_function_example.cpp)
-set_property(TARGET 3_win32_hresult_boundary_function_example PROPERTY FOLDER "examples")
+add_executable (3_lippincott_blog_post_example 3_lippincott_blog_post_example.cpp)
+set_property(TARGET 3_lippincott_blog_post_example PROPERTY FOLDER "examples/general")
 
-add_executable (4_lippincott_blog_post_example 4_lippincott_blog_post_example.cpp)
-set_property(TARGET 4_lippincott_blog_post_example PROPERTY FOLDER "examples")
+if(MSVC)
+	add_executable (1_win32_hresult_boundary_function_example 1_win32_hresult_boundary_function_example.cpp)
+	set_property(TARGET 1_win32_hresult_boundary_function_example PROPERTY FOLDER "examples/windows")
+
+	add_executable (2_mfc_exception_handling 2_mfc_exception_handling.cpp)
+	set_property(TARGET 2_mfc_exception_handling PROPERTY FOLDER "examples/windows")
+endif(MSVC)
 
 
 if(MSVC)
