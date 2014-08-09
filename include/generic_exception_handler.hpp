@@ -20,6 +20,7 @@ namespace mittens
       {
          throw; // Don't catch anything. Re-throw any current exception
       }
+      FailCodeType operator()() { return handleException(); }
    };
 
 
@@ -66,7 +67,7 @@ namespace mittens
          // This means 'e' can and needs to be passed to the custom-action (if the exception is caught)
          try
          {
-            return nestedHandler.handleException();
+            return nestedHandler();
          }
          catch (ExceptionType& e)
          {
@@ -83,7 +84,7 @@ namespace mittens
          // Handle the case of ExceptionType == void: Interpret this as catch-all: '...'
          try
          {
-            return nestedHandler.handleException();
+            return nestedHandler();
          }
          catch (...)
          {
