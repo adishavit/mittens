@@ -48,10 +48,11 @@ namespace mittens
    public:
       typedef typename NestedHandler::FailCodeType FailCodeType;
 
-      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction = Callable()):
+      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction = Callable(), bool supressExceptionsInAction = true):
          failCode_(failCode),
          nestedHandler(nestedHandler),
-         customAction_(customAction)
+         customAction_(customAction),
+         supressExceptionsInAction_(supressExceptionsInAction)
       {}
 
       FailCodeType handleException() { return handleException_(Bool2Type<std::is_same<ExceptionType, void>::value>()); }
@@ -97,13 +98,13 @@ namespace mittens
 
       FailCodeType handleVoidExceptionType(Bool2Type<true> shouldReturnFromCustomAction)
       {
-         try { return customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+         try { return customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
       FailCodeType handleVoidExceptionType(Bool2Type<false> shouldReturnFromCustomAction)
       {
-         try { customAction_(); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+         try { customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
@@ -116,7 +117,7 @@ namespace mittens
             catch (ExceptionType& e)
             {
                // now we have 'e':
-               try { return customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+               try { return customAction_(e); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
                return failCode_;
             }
          } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
@@ -132,7 +133,7 @@ namespace mittens
             catch (ExceptionType& e)
             {
                // now we have 'e':
-               try { customAction_(e); } catch (...) {} // Run custom action. Force it no-throw by suppressing any exceptions
+               try { customAction_(e); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
                return failCode_;
             }
          } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
@@ -143,22 +144,23 @@ namespace mittens
       FailCodeType failCode_;
       NestedHandler nestedHandler;
       Callable customAction_; 
+      bool supressExceptionsInAction_;
    };
 
 
    template <typename ExceptionType, typename Callable, typename NestedHandler>
-   inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, Callable customAction, NestedHandler const& nestedHandler)
-   {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction); }
+   inline GenericExceptionHandler<ExceptionType, NestedHandler, Callable> generic_handler(typename NestedHandler::FailCodeType failCode, Callable customAction, NestedHandler const& nestedHandler, bool supressExceptionsInAction = true)
+   {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction, supressExceptionsInAction); }
 
    template <typename ExceptionType, typename NestedHandler>
-   inline GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler)
-   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler); }
+   inline GenericExceptionHandler<ExceptionType, NestedHandler, DefaultNoAction<ExceptionType>> generic_handler(typename NestedHandler::FailCodeType failCode, NestedHandler const& nestedHandler, bool supressExceptionsInAction = true)
+   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler, supressExceptionsInAction); }
 
    template <typename ExceptionType, typename Callable, typename FailCodeType>
-   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, Callable> generic_handler(FailCodeType failCode, Callable customAction)
-   {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>()); }
+   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, Callable> generic_handler(FailCodeType failCode, Callable customAction, bool supressExceptionsInAction = true)
+   {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>(), supressExceptionsInAction); }
 
    template <typename ExceptionType, typename FailCodeType>
-   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, DefaultNoAction<ExceptionType>> generic_handler(FailCodeType failCode)
-   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), UnHandler<FailCodeType>()); }
+   inline GenericExceptionHandler<ExceptionType, UnHandler<FailCodeType>, DefaultNoAction<ExceptionType>> generic_handler(FailCodeType failCode, bool supressExceptionsInAction = true)
+   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), UnHandler<FailCodeType>(), supressExceptionsInAction); }
 }

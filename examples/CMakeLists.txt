@@ -17,12 +17,19 @@ set_property(TARGET 2_custom_app_return_codes_with_messages PROPERTY FOLDER "exa
 add_executable (3_lippincott_blog_post_example 3_lippincott_blog_post_example.cpp)
 set_property(TARGET 3_lippincott_blog_post_example PROPERTY FOLDER "examples/general")
 
+add_executable (4_multi_catch 4_multi_catch.cpp)
+set_property(TARGET 4_multi_catch PROPERTY FOLDER "examples/general")
+
 if(MSVC)
 	add_executable (1_win32_hresult_boundary_function_example 1_win32_hresult_boundary_function_example.cpp)
 	set_property(TARGET 1_win32_hresult_boundary_function_example PROPERTY FOLDER "examples/windows")
 
 	add_executable (2_mfc_exception_handling 2_mfc_exception_handling.cpp)
 	set_property(TARGET 2_mfc_exception_handling PROPERTY FOLDER "examples/windows")
+	
+	# add_executable (3_seh_exception_handling 3_seh_exception_handling.cpp)
+	# set_property(TARGET 3_seh_exception_handling PROPERTY FOLDER "examples/windows")
+	
 endif(MSVC)
 
 
