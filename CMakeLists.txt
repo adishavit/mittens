@@ -12,6 +12,7 @@ include_directories(include)
 file(GLOB include_files include/*.hpp)
 
 add_executable (unit_tests 	${include_files}
+							tests/generic_exception_handler_call_arity_tests.cpp
 							tests/generic_exception_handler_test.cpp
 							tests/std_exception_handler_test.cpp
 							tests/all_catcher_test.cpp

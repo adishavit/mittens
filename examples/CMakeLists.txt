@@ -2,7 +2,7 @@
 include_directories(${Boost_INCLUDE_DIR})
 
 include_directories(../include)
-include_directories(../test)
+include_directories(../tests)
 
 
 add_executable (0_simplest_example 0_simplest_example.cpp)
