@@ -26,10 +26,10 @@ if(MSVC)
 
 	add_executable (2_mfc_exception_handling 2_mfc_exception_handling.cpp)
 	set_property(TARGET 2_mfc_exception_handling PROPERTY FOLDER "examples/windows")
-	
+
 	# add_executable (3_seh_exception_handling 3_seh_exception_handling.cpp)
 	# set_property(TARGET 3_seh_exception_handling PROPERTY FOLDER "examples/windows")
-	
+
 endif(MSVC)
 
 
@@ -38,4 +38,3 @@ if(MSVC)
    add_definitions(/D_SCL_SECURE_NO_WARNINGS)
    add_definitions(/DNOMINMAX)
 endif(MSVC)
-

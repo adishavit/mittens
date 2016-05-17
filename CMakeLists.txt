@@ -1,6 +1,8 @@
 project (Mittens)
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 # Find and add Boost for Boost.Test
 find_package(Boost REQUIRED)
@@ -20,8 +22,8 @@ add_executable (unit_tests 	${include_files}
 							tests/bad_alloc_handler_test.cpp
 							tests/exception_generators.hpp
 							tests/main.cpp)
-						
-						
+
+
 target_link_libraries(unit_tests ${Boost_LIBRARIES})
 
 
@@ -34,4 +36,3 @@ endif(MSVC)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 add_subdirectory (examples)
-

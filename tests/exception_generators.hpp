@@ -26,7 +26,7 @@ inline void throw_runtime_error()
 
 inline void throw_std_exception()
 {
-   throw std::exception("std::exception!");
+   throw std::logic_error("std::exception!");
 }
 
 inline void throw_seh_exception()
@@ -41,6 +41,6 @@ inline void throw_seh_exception()
 
 inline void throw_terminate_signal()
 {
-   terminate();
+   std::terminate();
 }
 
