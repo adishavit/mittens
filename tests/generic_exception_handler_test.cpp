@@ -230,4 +230,15 @@ BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_paren_operator_test)
    }
 }
 
+BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_call_outside_catch_clause_test)
+{
+   auto allCatcher = generic_handler<void>(-1,
+                        generic_handler<std::exception>(-2));
+
+   // We call allCatcher() outside a catch-block, when there is no exception "in-the-air".
+   // This is ALWAYS a BUG. The call will generate an std::logic_error that will be intercepted by generic_handler<std::exception>.
+   BOOST_CHECK_EQUAL(-2, allCatcher());
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

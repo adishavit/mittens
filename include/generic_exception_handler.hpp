@@ -18,7 +18,13 @@ namespace mittens
 
       FailCodeType handleException()
       {
-         throw; // Don't catch anything. Re-throw any current exception
+         // Instead of a call to `throw` we will check if the function was called inside a
+         // catch clause. If so, `std::rethrow_exception(eptr)` is the same as `throw`.
+         // Otherwise, throw an `std::logic_error` since this is obviously a bug.
+         if (std::exception_ptr eptr = std::current_exception())
+            std::rethrow_exception(eptr);
+
+         throw std::logic_error("Mittens handler called outside of a catch clause! This is a BUG.");
       }
       FailCodeType operator()() { return handleException(); }
    };
