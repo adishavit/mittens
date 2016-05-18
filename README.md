@@ -44,7 +44,7 @@ Application prints: `Caught std::exception: Goodbye World, Hello Mittens!` and t
 - BSD License 
 
 #### Docs
- - [Tutorial](https://github.com/adishavit/mittens/wiki/Tutorial).
+ - [Tutorial](https://github.com/adishavit/mittens/wiki/The-Mittens-Tutorial).
 
 #### Epilogue
 - Mittens grew out of the need to robustly and consistently handle exceptions across module boundaries in Windows DLLs and Android JNIs. 
