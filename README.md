@@ -19,7 +19,7 @@ Mittens is a generic header-only library that allows try-catch statement composi
 - Particularly useful along module boundaries: e.g command-line applications and dynamically loaded libraries (DLLs, shared-object `.so`, Android JNI, etc.) 
 
 ##### Show me the code!
-```
+```cpp
 #include "common_handlers.hpp"
 
 auto handleIt = mittens::all_catcher               (-1, []()       { std::cerr << "Caught exception of unknown type!"   << std::endl; }, 
@@ -48,7 +48,7 @@ Application prints: `Caught std::exception: Goodbye World, Hello Mittens!` and t
 #### Goodbye World, Hello Mittens
 
 Here's a very simple program throwing an exception:
-```
+```cpp
 #include "common_handlers.hpp"
 
 using namespace mittens;
@@ -73,7 +73,7 @@ Here, `mittens::all_catcher` takes a single argument - the value to be returned 
 
 But what if we want to do something extra when an exception is thrown?  
 We just throw in a lambda (pun intended):
-```
+```cpp
 // same as above...
 catch (...)
 {
@@ -94,7 +94,7 @@ And what about handling multiple exception types?
 This is where Mittens' true power begins to manifest itself. As claimed above, Mittens allows exception catcher composition.  
 Let's see an example:
 
-```
+```cpp
 // same as above...
 catch (...)
 {
@@ -114,7 +114,7 @@ In this form, the first 2 handlers (`all_catcher` and `std_exception_handler`) t
  3. Another (nested) handler  
 
 These 3 lines of code replace this typical code:
-```
+```cpp
 // same as above...
 catch (std::bad_alloc& e)
 {
@@ -144,7 +144,7 @@ Our handler is an object that can be created a reused.
 This allows us to separate the exception handling code and policy from the site where the exception is caught.  
 Define the (composite) handler once, and use it over and over anywhere it is needed:
 
-```
+```cpp
   // somewhere in scope:
   auto myHandler = all_catcher          (-1, []()       { std::cerr << "Caught unhandled exception of unknown type!"   << std::endl; }, 
                    std_exception_handler(-2, [](auto& e){ std::cerr << "Caught unhandled std::exception: " << e.what() << std::endl; },
@@ -173,7 +173,7 @@ When the exception handling logic changes, all we need to do is update the `myHa
 #### Custom Exception Types
 Handling custom exception types is very similar to pre-defined types.  
 We parametrize `mittens::generic_handler<>` with our custom type:
-```
+```cpp
 struct MyException: std::exception
 {
   // ctor and more code ...
