@@ -1,14 +1,14 @@
 Mittens ![icon](mittens_icon.png)
 =======
 
-Mittens is a small header-only library for uniform handling of exceptions, particularly along module boundaries. 
+Mittens is a cross-platform, C++ header-only library for uniform handling of exceptions, particularly along module boundaries. 
 
 Robust software needs to be able to handle exceptions as gracefully as possible. This might include last-minute error logging, alternate notification mechanisms (e.g. via the JVM) etc. 
 
-An unexpected exit out of `main()` or an exception escaping from a DLL, COM or JNI function call can cause severe havoc. These module boundaries are stress-points where escaped exceptions should be firmly handled.
+An unexpected exit out of `main()` or an exception escaping from a DLL, COM or JNI function call can cause severe havoc. Module boundaries are stress-points where escaped exceptions should be firmly handled.  
 Along dynamic module boundaries, in particular, we want uniform handling of exceptions from multiple C-like functions. This often requires a lot of copy-paste code since try-catch statements do not naturally compose nor can they be easily encapsulated.
 
-Mittens is a generic header-only library that allows try-catch statement composition, ordering and nesting with customizable actions per exception type. These composite exception handlers can be defined once and used multiple times where needed. 
+Mittens is a generic header-only library that allows try-catch statement composition, ordering and nesting with customizable actions per exception type. These composite exception handlers can be defined once and reused multiple times where needed. 
 
 Tutorial
 --------
@@ -31,10 +31,10 @@ catch (...)
 }
 ```
 
-Obviously, `main` throws an error. We use the pre-defined helper handler `mittens::all_catcher` to intercept the exception and return the `EXIT_FAILURE` return value.  
+Our `main` throws an exception. We use the pre-defined helper handler `mittens::all_catcher` to intercept the exception and return the `EXIT_FAILURE` return value.  
 Here, `mittens::all_catcher` takes a single argument - the value to be returned when calling `handleException()`. 
 
-The example also demonstrates the use of the lesser known [function try block](http://en.cppreference.com/w/cpp/language/function-try-block), surrounding the function body from the *outside*. The code will also work the same in the try-catch block was inside the function.
+&#10148; The example also demonstrates the use of the lesser known [function try block](http://en.cppreference.com/w/cpp/language/function-try-block), surrounding the function body from the *outside*. The code will also work the same in the try-catch block was inside the function.
 
 #### Don't just stand there
 
@@ -47,17 +47,18 @@ catch (...)
    return all_catcher(EXIT_FAILURE, [](){ cout << "Oh My!"<< endl; })(); 
 }
 ```
-Here, the handler `mittens::all_catcher` takes a two arguments:
+Here, the handler `mittens::all_catcher` takes a *two* arguments:
  1. The value (`EXIT_FAILURE`) to be returned when activated. 
  2. A lambda to be called before returning.  
-Note also that instead of calling `.handleException();` we can use the empty function call `operator()`.
 
-This is all very nice, but isn't all that different (nor much shorter nor clearer) from regular try-catch(...) blocks.
+&#10148; Note also, that instead of calling `.handleException();` we can use the function call `operator()`.
+
+This is all very nice, but it isn't all that different (nor much shorter nor clearer) from regular try-catch(...) blocks.  
 And what about handling multiple exception types?  
 
-#### Multiple Exception Types
+#### Handling Multiple Exception Types
 
-This is where Mitten's power shines. As claimed above, Mittens allows exception catcher composition.  
+This is where Mittens begins to manifest itself. As claimed above, Mittens allows exception catcher composition.  
 Let's see an example:
 
 ```
@@ -70,7 +71,14 @@ catch (...)
 }
 ```
 Here we use 3 nested pre-defined handlers `all_catcher`, `std_exception_handler` and `bad_alloc_handler`.  
-The exceptions will be handles in the order of composition, i.e. inner-to-outer, so fall-through is naturally supported. Each of the handlers also (optionally) accepts its own lambda for customization.
+The exceptions will be handled in the order of composition, i.e. inner-to-outer, so fall-through is naturally supported. Each of the handlers also (optionally) accepts its own lambda for customization.   
+The *lambdas* for `std_exception_handler` and `bad_alloc_handler` take the exception type as parameters.  
+&#10148; Where polymorphic lambdas are available, simply use `auto`. 
+
+In this form, the first 2 handlers (`all_catcher` and `std_exception_handler`) take *three* arguments:  
+ 1. The value to be returned when activated. 
+ 2. A lambda to be called before returning.
+ 3. Another (nested) handler  
 
 These 3 lines of code replace this typical code:
 ```
@@ -92,10 +100,15 @@ catch (...)
 }
 ```
 
-What if this was not `main()` but multiple exported DLL C-functions?  
-You would need to duplicate the catch code above at the end of *each* function! If the exception handling policy is changed you had better make sure that you re-copy-paste everything at the end of each of these functions.
+#### The DRY Principle
 
-Our handler is an object that can be created a reused. This allows us to separate the exception handling code and policy from the site where the exception is caught.  
+What if this was not `main()` but multiple exported DLL C-functions?  
+
+You would need to duplicate the catch code above at the end of *each* function!  
+When the exception handling policy is changed (e.g. when new exception types are added or different logging is needed), you had better make sure that you re-copy-paste everything properly at the end of each one of these functions.
+
+Our handler is an object that can be created a reused.  
+This allows us to separate the exception handling code and policy from the site where the exception is caught.  
 Define the (composite) handler once, and use it over and over anywhere it is needed:
 
 ```
@@ -106,26 +119,74 @@ Define the (composite) handler once, and use it over and over anywhere it is nee
 
   // my functions 
   int f() try 
-  {
-    //...
-  }
+  { /* ... */ }
   catch (...)
   { return myHandler(); } // <<< always stays the same
   
   int g() try 
-  {
-    //...
-  }
+  { /* ... */ }
   catch (...)
   { return myHandler(); } // <<< always stays the same
   
   void h() try 
-  {
-    //...
-  }
+  { /* ... */ }
   catch (...)
   { myHandler(); }  // <<< always stays the same. NOTE: no return, ignore value
   
 ```  
+When the exception handling logic changes, all we need to do is update the `myHandler` definition. The rest of the code remains unchanged.  
+&#10148; Here, `myHandler()` (using the `operator()` syntax) is a naturally looking alias for `myHandler.handleException()`.  
 
-Check out the examples folder for more examples of how Mittens can help you and more advanced usage. 
+#### Custom Exception Types
+Handling custom exception types is very similar to pre-defined types.  
+We parametrize `mittens::generic_handler<>` with our custom type:
+```
+struct MyException: std::exception
+{
+  // ctor and more code ...
+  int foo();
+}
+
+int main() try
+{
+   throw MyException("Goodbye World, Hello Mittens!");
+   return EXIT_SUCCESS;
+}
+catch (...)
+{
+   return generic_handler<void>          (-1, []()       { std::cerr << "Caught unexpected exception!" << std::endl; }, 
+          generic_handler<std::exception>(-2, [](auto& e){ std::cerr << "Caught std::exception: "      << e.what() << std::endl; },
+          generic_handler<MyException>   (-3, [](auto& e){ std::cerr << "Caught MyException: "         << e.foo() << std::endl; }, 
+          generic_handler<int>           (-4, [](auto& e){ std::cerr << "Caught thrown int: "          << e << std::endl; })))(); 
+}
+```
+In this snippet we separately handle exceptions of the following types and in this order: `int`, `MyException`, `std::exception` and then any other type. When catching `MyException` we can naturally use the `MyException::foo()` method as expected.  
+
+The pre-defined types mentioned previously are simply specialized versions of `generic_handler<>`.  
+- `std_exception_handler` is an alias for `generic_handler<std::exception>`   
+- `all_catcher` is an alias for `generic_handler<void>`!
+
+&#10148; Note that since `void` is the only type that *cannot* be thrown, it is thus a perfect choice to indicate the *type-less* catch-all `(...)`.     
+
+
+#### Dependent Return Values
+`/* ... to-be-described ... */`
+#### Logging and Rethrowing
+`/* ... to-be-described ... */`
+#### Advanced Usage
+```
+/* ... to-be-described ...
+- Platform specific examples ...
+- Type Conversions (JVM JNI) ...  
+*/
+```
+
+#### Epilogue
+- Mittens grew out of the need to robustly and consistently handle exception across module boundaries in Windows DLLs and Android JNIs. 
+- The first version was written in 2013. This repo is a complete rewrite to allow for much more genericity.
+- Although the design is very different, it was inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
+- Check out the examples folder for more examples of how Mittens can help you and more advanced usage.
+- Comments, discussions, questions, ideas and PRs are most welcome!
+
+
+
