@@ -17,8 +17,8 @@ namespace mittens
    {  return generic_handler<void>(failCode, func, supressExceptionsInAction); }
 
    template <typename FailCodeType>
-   inline auto all_catcher(FailCodeType failCode, bool supressExceptionsInAction = true)
-   {  return generic_handler<void>(failCode, supressExceptionsInAction); }
+   inline auto all_catcher(FailCodeType failCode)
+   {  return generic_handler<void>(failCode); }
 
    //////////////////////////////////////////////////////////////////////////
    // std::exception handler maker
@@ -31,8 +31,8 @@ namespace mittens
    {  return generic_handler<std::exception>(failCode, func, supressExceptionsInAction); }
 
    template <typename FailCodeType>
-   inline auto std_exception_handler(FailCodeType failCode, bool supressExceptionsInAction = true)
-   {  return generic_handler<std::exception>(failCode, supressExceptionsInAction); }
+   inline auto std_exception_handler(FailCodeType failCode)
+   {  return generic_handler<std::exception>(failCode); }
 
    //////////////////////////////////////////////////////////////////////////
    // std::bad_alloc handler maker
@@ -45,7 +45,7 @@ namespace mittens
    {  return generic_handler<std::bad_alloc>(failCode, func, supressExceptionsInAction); }
 
    template <typename FailCodeType>
-   inline auto bad_alloc_handler(FailCodeType failCode, bool supressExceptionsInAction = true)
-   {  return generic_handler<std::bad_alloc>(failCode, supressExceptionsInAction); }
+   inline auto bad_alloc_handler(FailCodeType failCode)
+   {  return generic_handler<std::bad_alloc>(failCode); }
 }
 

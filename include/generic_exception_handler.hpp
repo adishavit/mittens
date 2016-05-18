@@ -152,28 +152,30 @@ namespace mittens
    inline auto generic_handler(typename NestedHandler::FailCodeType failCode, Callable customAction, NestedHandler const& nestedHandler, bool supressExceptionsInAction = true)
    {  return GenericExceptionHandler<ExceptionType, NestedHandler, Callable>(failCode, nestedHandler, customAction, supressExceptionsInAction); }
 
-   namespace detail
+   namespace
    {
-      //////////////////////////////////////////////////////////////////////////
-      // Helper functions for SFINAE overload resolution
-      template< typename ... Ts >
-      using void_t = void;
+      namespace detail
+      {
+         //////////////////////////////////////////////////////////////////////////
+         // Helper functions for SFINAE overload resolution
+         template< typename ... Ts >
+         using void_t = void;
 
-      template< typename T, typename = void >
-      struct hasNestedFailCodeType : std::false_type {};
+         template< typename T, typename = void >
+         struct hasNestedFailCodeType : std::false_type {};
 
-      template< typename T >
-      struct hasNestedFailCodeType< T, void_t<typename T::FailCodeType> > : std::true_type {};
+         template< typename T >
+         struct hasNestedFailCodeType< T, void_t<typename T::FailCodeType> > : std::true_type {};
+         //////////////////////////////////////////////////////////////////////////
 
-      //////////////////////////////////////////////////////////////////////////
+         template <typename ExceptionType, typename Callable, typename FailCodeType>
+         inline auto generic_handler_impl(FailCodeType failCode, Callable customAction, bool supressExceptionsInAction, std::false_type)
+         {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>(), supressExceptionsInAction);          }
 
-      template <typename ExceptionType, typename Callable, typename FailCodeType>
-      inline auto generic_handler_impl(FailCodeType failCode, Callable customAction, bool supressExceptionsInAction, std::false_type)
-      {  return generic_handler<ExceptionType>(failCode, customAction, UnHandler<FailCodeType>(), supressExceptionsInAction); }
-
-      template <typename ExceptionType, typename NestedHandler, typename FailCodeType>
-      inline auto generic_handler_impl(FailCodeType failCode, NestedHandler const& nestedHandler, bool supressExceptionsInAction, std::true_type)
-      {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler, supressExceptionsInAction); }
+         template <typename ExceptionType, typename NestedHandler, typename FailCodeType>
+         inline auto generic_handler_impl(FailCodeType failCode, NestedHandler const& nestedHandler, bool supressExceptionsInAction, std::true_type)
+         {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), nestedHandler, supressExceptionsInAction);  }
+      }
    }
 
    template <typename ExceptionType, typename Callable, typename FailCodeType>
@@ -181,6 +183,6 @@ namespace mittens
    {  return detail::generic_handler_impl<ExceptionType>(code, func, supressExceptionsInAction, detail::hasNestedFailCodeType<Callable>{}); }
 
    template <typename ExceptionType, typename FailCodeType>
-   inline auto generic_handler(FailCodeType failCode, bool supressExceptionsInAction = true)
-   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), UnHandler<FailCodeType>(), supressExceptionsInAction); }
+   inline auto generic_handler(FailCodeType failCode)
+   {  return generic_handler<ExceptionType>(failCode, DefaultNoAction<ExceptionType>(), UnHandler<FailCodeType>()); }
 }
