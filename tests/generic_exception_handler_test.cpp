@@ -200,6 +200,19 @@ BOOST_AUTO_TEST_CASE(generic_catcher_with_custom_action_which_return_fail_code)
          }
       }
    }
+   {
+      auto intCatcher = generic_handler<int>(0.1, [&](int&) { return 2.5; }); // labda retunrs a double != int, so default value should return
+      {
+         try
+         {
+            throw_int();
+         }
+         catch (...)
+         {
+            BOOST_CHECK_EQUAL(2.5, intCatcher.handleException());
+         }
+      }
+   }
 }
 
 BOOST_AUTO_TEST_CASE(GenericExceptionCatcher_paren_operator_test)
