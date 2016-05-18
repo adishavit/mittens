@@ -1,7 +1,7 @@
-Mittens ![icon](mittens_icon.png)
+![icon](mittens_icon.png) Mittens 
 =======
 
-Mittens is a cross-platform, C++ header-only library for uniform handling of exceptions, particularly along module boundaries. 
+Mittens is a cross-platform, C++ header-only library for centralized handling of exceptions, particularly along module boundaries. 
 
 Robust software needs to be able to handle exceptions as gracefully as possible. This might include last-minute error logging, alternate notification mechanisms (e.g. via the JVM) etc. 
 
@@ -10,7 +10,40 @@ Along dynamic module boundaries, in particular, we want uniform handling of exce
 
 Mittens is a generic header-only library that allows try-catch statement composition, ordering and nesting with customizable actions per exception type. These composite exception handlers can be defined once and reused multiple times where needed. 
 
-Tutorial
+![icon](mittens_icon.png) TL;DR
+-----
+##### Features
+- Centralized, uniform, maintainable, consistent and composable exception handling;
+- Support both portable cross-platform and platform-specific code;
+- Write robust, well ordered, exception-type-specific custom code;
+- Particularly useful along module boundaries: e.g command-line applications and dynamically loaded libraries (DLLs, shared-object `.so`, Android JNI, etc.) 
+
+##### Show me the code!
+```
+#include "common_handlers.hpp"
+
+auto handleIt = mittens::all_catcher               (-1, []()       { std::cerr << "Caught exception of unknown type!"   << std::endl; }, 
+                   mittens::std_exception_handler  (-2, [](auto& e){ std::cerr << "Caught std::exception: " << e.what() << std::endl; },
+                      mittens::generic_handler<int>(-3, [](auto& e){ std::cerr << "Caught thrown `int` = " << e << std::endl; })));
+
+int main() try
+{
+   throw std::runtime_error("Goodbye World, Hello Mittens!");
+   return EXIT_SUCCESS;
+}
+catch (...) 
+{  return handleIt(); }
+```
+Application prints: `Caught std::exception: Goodbye World, Hello Mittens!` and the app return value will be `-2`.
+
+##### Integration
+- Single header file `generic_exception_handler.hpp` + optional helper header (`common_handlers.hpp`).
+- Cross platform: Windows, Linux OSX;
+- Latest version and examples use C++11/14 features like `auto` and [polymorphic] lambdas but the core code should be easily downgradable to older compilers (e.g. VS2010);  
+- No external dependencies (but unit tests use Boost.Test);
+- BSD License 
+
+![icon](mittens_icon.png) Tutorial
 --------
 #### Goodbye World, Hello Mittens
 
@@ -34,7 +67,7 @@ catch (...)
 Our `main` throws an exception. We use the pre-defined helper handler `mittens::all_catcher` to intercept the exception and return the `EXIT_FAILURE` return value.  
 Here, `mittens::all_catcher` takes a single argument - the value to be returned when calling `handleException()`. 
 
-&#10148; The example also demonstrates the use of the lesser known [function try block](http://en.cppreference.com/w/cpp/language/function-try-block), surrounding the function body from the *outside*. The code will also work the same in the try-catch block was inside the function.
+&#10148; The example also demonstrates the use of the lesser known [function try block](http://en.cppreference.com/w/cpp/language/function-try-block), surrounding the function body from the *outside*. The code will also work the same if the try-catch block was inside the function.
 
 #### Don't just stand there
 
@@ -58,7 +91,7 @@ And what about handling multiple exception types?
 
 #### Handling Multiple Exception Types
 
-This is where Mittens begins to manifest itself. As claimed above, Mittens allows exception catcher composition.  
+This is where Mittens' true power begins to manifest itself. As claimed above, Mittens allows exception catcher composition.  
 Let's see an example:
 
 ```
@@ -166,7 +199,7 @@ The pre-defined types mentioned previously are simply specialized versions of `g
 - `std_exception_handler` is an alias for `generic_handler<std::exception>`   
 - `all_catcher` is an alias for `generic_handler<void>`!
 
-&#10148; Note that since `void` is the only type that *cannot* be thrown, it is thus a perfect choice to indicate the *type-less* catch-all `(...)`.     
+&#10148; Note that since `void` is the only type that *cannot* be thrown, it is a perfect choice to indicate the *type-less* catch-all `(...)`.     
 
 
 #### Dependent Return Values
@@ -182,9 +215,9 @@ The pre-defined types mentioned previously are simply specialized versions of `g
 ```
 
 #### Epilogue
-- Mittens grew out of the need to robustly and consistently handle exception across module boundaries in Windows DLLs and Android JNIs. 
+- Mittens grew out of the need to robustly and consistently handle exceptions across module boundaries in Windows DLLs and Android JNIs. 
 - The first version was written in 2013. This repo is a complete rewrite to allow for much more genericity.
-- Although the design is very different, it was inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
+- Although the design is very different, Mittens was inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
 - Check out the examples folder for more examples of how Mittens can help you and more advanced usage.
 - Comments, discussions, questions, ideas and PRs are most welcome!
 
