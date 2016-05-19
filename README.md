@@ -18,7 +18,7 @@ Mittens is a generic header-only library that allows try-catch statement composi
 - Write robust, well ordered, exception-type-specific custom code;
 - Particularly useful along module boundaries: e.g command-line applications and dynamically loaded libraries (DLLs, shared-object `.so`, Android JNI, etc.) 
 
-#### TL;DR. Show me the code!
+#### TL;DR: Show Me the Code!
 ```cpp
 #include "common_handlers.hpp"
 
@@ -36,20 +36,18 @@ catch (...)
 ```
 Application prints: `Caught std::exception: Goodbye World, Hello Mittens!` and the app return value will be `-2`.
 
+**See the [Tutorial](https://github.com/adishavit/mittens/wiki/The-Mittens-Tutorial) for more.**
+
 #### Integration
 - Single header file `generic_exception_handler.hpp` + optional helper header (`common_handlers.hpp`).
 - Cross platform: Windows, Linux OSX;
-- Latest version and examples use C++11/14 features like `auto` and [polymorphic] lambdas but the core code should be easily downgradable to older compilers (e.g. VS2010);  
 - No external dependencies (but unit tests use Boost.Test);
 - BSD License 
-
-#### Docs
- - [Tutorial](https://github.com/adishavit/mittens/wiki/The-Mittens-Tutorial).
 
 #### Epilogue
 - Mittens grew out of the need to robustly and consistently handle exceptions across module boundaries in Windows DLLs and Android JNIs. 
 - The first version was written in 2013. This repo is a complete rewrite to allow for much more genericity.
-- Although the design is very different, Mittens was inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
+- Although the design is very different, Mittens was originally inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
 - Check out the `examples` folder for more examples of how Mittens can help you and more advanced usage.
 - Comments, discussions, questions, ideas and PRs are most welcome!
 
