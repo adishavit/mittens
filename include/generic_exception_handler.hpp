@@ -56,111 +56,49 @@ namespace mittens
          supressExceptionsInAction_(supressExceptionsInAction)
       {}
 
-      FailCodeType handleException() { return handleException_<>(); }
       FailCodeType operator()() { return handleException(); }
-
-   private:
-
-      //////////////////////////////////////////////////////////////////////////
-
-      using IsCatchAll = typename std::is_same<ExceptionType, void>::type; // std::true_type or std::false_type
-
-      template <typename = IsCatchAll>
-      FailCodeType handleException_();
-
-      template<> 
-      FailCodeType handleException_<std::false_type>()
+      FailCodeType handleException() 
       {
-         // Handle the case of ExceptionType != void
-         // This means 'e' can and needs to be passed to the custom-action (if the exception is caught)
+         // Handle the general non-catch-all case 
+         static_assert(!std::is_same<void, ExceptionType>::value, "Something wrong: specialization failed. ExceptionType is 'void'");
          try
          {
             return nestedHandler();
          }
          catch (ExceptionType& e)
          {
-            // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
-            // then return the result of custom action as the fail code.
-            using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e)) >::type;
-            return handleNonVoidExceptionType<ReturnActionResult>();
-            e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
-         }
-      }
-
-      template<>
-      FailCodeType handleException_<std::true_type>()
-      {
-         // Handle the case of ExceptionType == void: Interpret this as catch-all: '...'
-         try
-         {
-            return nestedHandler();
-         }
-         catch (...)
-         {
-            // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
-            // then return the result of custom action as the fail code.
-            using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type;
-            return handleVoidExceptionType<ReturnActionResult>();
-         }
-      }
-
-      //////////////////////////////////////////////////////////////////////////
-
-      template <typename = std::true_type>
-      FailCodeType handleVoidExceptionType();
-
-      template <>
-      FailCodeType handleVoidExceptionType<std::true_type>()
-      {
-         try { return customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
-         return failCode_;
-      }
-
-      template <>
-      FailCodeType handleVoidExceptionType<std::false_type>()
-      {
-         try { customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
-         return failCode_;
-      }
-
-      //////////////////////////////////////////////////////////////////////////
-
-      template <typename = std::true_type>
-      FailCodeType handleNonVoidExceptionType();
-         
-      template <>
-      FailCodeType handleNonVoidExceptionType<std::true_type>()
-      {
-         try 
-         { 
-            try 
-            { throw; } // rethrow to get 'e' - can't pass it as argument since it may be of type void
-            catch (ExceptionType& e)
+            try
             {
-               // now we have 'e':
-               try { return customAction_(e); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
-               return failCode_;
+               // Run custom action, passing it 'e'
+               // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
+               // then return the result of custom action as the fail code.
+               using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e))>::type;
+               return runAction<ReturnActionResult>(e);
             }
-         } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
-         return failCode_;
+            catch (...)
+            {
+               // Force the action no-throw by suppressing any exceptions unless requested not to.
+               if (!supressExceptionsInAction_)
+                  throw;
+            }
+            return failCode_;
+         }
+      }
+
+   private:
+      template <typename = std::true_type>
+      FailCodeType runAction(ExceptionType& e)
+      {
+         return customAction_(e);
       }
 
       template <>
-      FailCodeType handleNonVoidExceptionType<std::false_type>()
+      FailCodeType runAction<std::false_type>(ExceptionType& e)
       {
-         try 
-         { 
-            try 
-            { throw; } // rethrow to get 'e' - can't pass it as argument since it may be of type void
-            catch (ExceptionType& e)
-            {
-               // now we have 'e':
-               try { customAction_(e); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
-               return failCode_;
-            }
-         } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
+         customAction_(e);
          return failCode_;
       }
+
 
       //////////////////////////////////////////////////////////////////////////
 
@@ -168,6 +106,70 @@ namespace mittens
       FailCodeType failCode_;
       NestedHandler nestedHandler;
       Callable customAction_; 
+      bool supressExceptionsInAction_;
+   };
+
+   //////////////////////////////////////////////////////////////////////////
+   // Specialize for the catch-all (...) case. Indicated by ExceptionType being void
+   template <typename NestedHandler, typename Callable>
+   class GenericExceptionHandler<void, NestedHandler, Callable>
+   {
+   public:
+      typedef typename NestedHandler::FailCodeType FailCodeType;
+
+      GenericExceptionHandler(FailCodeType failCode, NestedHandler const& nestedHandler, Callable customAction = Callable(), bool supressExceptionsInAction = true) :
+         failCode_(failCode),
+         nestedHandler(nestedHandler),
+         customAction_(customAction),
+         supressExceptionsInAction_(supressExceptionsInAction)
+      {}
+
+      FailCodeType operator()() { return handleException(); }
+      FailCodeType handleException()
+      {
+         try
+         {
+            return nestedHandler();
+         }
+         catch (...)
+         {            
+            try 
+            { 
+               // Run custom action. 
+               // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
+               // then return the result of custom action as the fail code.
+               using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type;
+               return runAction<ReturnActionResult>(); 
+            }
+            catch (...) 
+            { 
+               // Force the action no-throw by suppressing any exceptions unless requested not to.
+               if (!supressExceptionsInAction_)
+                  throw; 
+            } 
+            return failCode_;
+         }
+      }
+
+   private:
+
+      template <typename = std::true_type>
+      FailCodeType runAction() 
+      { 
+         return customAction_(); 
+      }
+
+      template <>
+      FailCodeType runAction<std::false_type>() 
+      {
+         customAction_();
+         return failCode_;
+      }
+
+   private:
+      FailCodeType failCode_;
+      NestedHandler nestedHandler;
+      Callable customAction_;
       bool supressExceptionsInAction_;
    };
 
