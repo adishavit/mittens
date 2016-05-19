@@ -82,7 +82,7 @@ namespace mittens
             // then return the result of custom action as the fail code.
             auto shouldReturnActionResult = Bool2Type< std::is_same< FailCodeType, decltype(customAction_(e)) >::value>();
             return handleNonVoidExceptionType(shouldReturnActionResult);
-            e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
+            (void)e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
          }
       }
 
