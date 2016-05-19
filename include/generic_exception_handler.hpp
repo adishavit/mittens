@@ -72,8 +72,8 @@ namespace mittens
                // Run custom action, passing it 'e'
                // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
                // then return the result of custom action as the fail code.
-               using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e))>::type;
-               return runAction<ReturnActionResult>(e);
+               using ReturnActionResult = typename std::is_same< FailCodeType, decltype(customAction_(e))>::type;
+               return runAction(e, ReturnActionResult{});
             }
             catch (...)
             {
@@ -86,21 +86,16 @@ namespace mittens
       }
 
    private:
-      template <typename = std::true_type>
-      FailCodeType runAction(ExceptionType& e)
+      FailCodeType runAction(ExceptionType& e, std::true_type)
       {
          return customAction_(e);
       }
 
-      template <>
-      FailCodeType runAction<std::false_type>(ExceptionType& e)
+      FailCodeType runAction(ExceptionType& e, std::false_type)
       {
          customAction_(e);
          return failCode_;
       }
-
-
-      //////////////////////////////////////////////////////////////////////////
 
    private:
       FailCodeType failCode_;
@@ -138,8 +133,8 @@ namespace mittens
                // Run custom action. 
                // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
                // then return the result of custom action as the fail code.
-               using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type;
-               return runAction<ReturnActionResult>(); 
+               using ReturnActionResult = typename std::is_same< FailCodeType, decltype(customAction_())>::type;
+               return runAction(ReturnActionResult{});
             }
             catch (...) 
             { 
@@ -152,15 +147,12 @@ namespace mittens
       }
 
    private:
-
-      template <typename = std::true_type>
-      FailCodeType runAction() 
+      FailCodeType runAction(std::true_type)
       { 
          return customAction_(); 
       }
 
-      template <>
-      FailCodeType runAction<std::false_type>() 
+      FailCodeType runAction(std::false_type)
       {
          customAction_();
          return failCode_;
