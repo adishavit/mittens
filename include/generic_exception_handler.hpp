@@ -75,8 +75,8 @@ namespace mittens
          {
             // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
             // then return the result of custom action as the fail code.
-            auto shouldReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e)) >::type{};
-            return handleNonVoidExceptionType(shouldReturnActionResult);
+            using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e)) >::type;
+            return handleNonVoidExceptionType<ReturnActionResult>();
             e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
          }
       }
@@ -92,24 +92,37 @@ namespace mittens
          {
             // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
             // then return the result of custom action as the fail code.
-            auto shouldReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type{};
-            return handleVoidExceptionType(shouldReturnActionResult);
+            using ReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type;
+            return handleVoidExceptionType<ReturnActionResult>();
          }
       }
 
-      FailCodeType handleVoidExceptionType(std::true_type shouldReturnFromCustomAction)
+      //////////////////////////////////////////////////////////////////////////
+
+      template <typename = std::true_type>
+      FailCodeType handleVoidExceptionType();
+
+      template <>
+      FailCodeType handleVoidExceptionType<std::true_type>()
       {
          try { return customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
-      FailCodeType handleVoidExceptionType(std::false_type shouldReturnFromCustomAction)
+      template <>
+      FailCodeType handleVoidExceptionType<std::false_type>()
       {
          try { customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
-      FailCodeType handleNonVoidExceptionType(std::true_type shouldReturnFromCustomAction)
+      //////////////////////////////////////////////////////////////////////////
+
+      template <typename = std::true_type>
+      FailCodeType handleNonVoidExceptionType();
+         
+      template <>
+      FailCodeType handleNonVoidExceptionType<std::true_type>()
       {
          try 
          { 
@@ -125,7 +138,8 @@ namespace mittens
          return failCode_;
       }
 
-      FailCodeType handleNonVoidExceptionType(std::false_type shouldReturnFromCustomAction)
+      template <>
+      FailCodeType handleNonVoidExceptionType<std::false_type>()
       {
          try 
          { 
@@ -140,6 +154,8 @@ namespace mittens
          } catch (...) {} // In case from some weird situation the re-thrown exception is not of type ExceptionType
          return failCode_;
       }
+
+      //////////////////////////////////////////////////////////////////////////
 
    private:
       FailCodeType failCode_;
