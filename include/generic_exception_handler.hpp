@@ -56,14 +56,20 @@ namespace mittens
          supressExceptionsInAction_(supressExceptionsInAction)
       {}
 
-      FailCodeType handleException() { return handleException_(std::is_same<ExceptionType, void>::type{}); }
+      FailCodeType handleException() { return handleException_<>(); }
       FailCodeType operator()() { return handleException(); }
 
    private:
+
       //////////////////////////////////////////////////////////////////////////
-      // What follows is lots of code and compile-time trickery to work-around 
-      // partial support for template specialization in VS2010
-      FailCodeType handleException_(std::false_type exceptionTypeNotVoid)
+
+      using IsCatchAll = typename std::is_same<ExceptionType, void>::type; // std::true_type or std::false_type
+
+      template <typename = IsCatchAll>
+      FailCodeType handleException_();
+
+      template<> 
+      FailCodeType handleException_<std::false_type>()
       {
          // Handle the case of ExceptionType != void
          // This means 'e' can and needs to be passed to the custom-action (if the exception is caught)
@@ -81,7 +87,8 @@ namespace mittens
          }
       }
 
-      FailCodeType handleException_(std::true_type exceptionTypeIsVoid)
+      template<>
+      FailCodeType handleException_<std::true_type>()
       {
          // Handle the case of ExceptionType == void: Interpret this as catch-all: '...'
          try
