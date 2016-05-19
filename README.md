@@ -5,10 +5,9 @@ Mittens is a cross-platform, C++ header-only library for centralized handling of
 
 Robust software needs to be able to handle exceptions as gracefully as possible. This might include last-minute error logging, alternate notification mechanisms (e.g. via the JVM) etc. 
 
-An unexpected exit out of `main()` or an exception escaping from a DLL, COM or JNI function call can cause severe havoc. Module boundaries are stress-points where escaped exceptions should be firmly handled.  
-Along dynamic module boundaries, in particular, we want uniform handling of exceptions from multiple C-like functions. This often requires a lot of copy-paste code since try-catch statements do not naturally compose nor can they be easily encapsulated.
+An unexpected exit out of `main()` or an exception escaping from a DLL, COM or JNI function call can cause severe havoc. Module boundaries are stress-points where escaped exceptions should be firmly handled. Dynamically linked libraries (DLLs) export multiple C-like functions forming the dynamic module boundaries. Here, in particular, we would like a uniform and consistent way of handling exceptions. This often requires a lot of copy-paste code since try-catch statements do not naturally compose nor can they be easily encapsulated.
 
-Mittens is a generic header-only library that allows try-catch statement composition, ordering and nesting with customizable actions per exception type. These composite exception handlers can be defined once and reused multiple times where needed. 
+Mittens is a generic header-only library that allows `try-catch` statement composition, ordering and nesting with customizable actions per exception type. These composite exception handlers can be defined once and reused multiple times where needed. 
 
 ![icon](mittens_icon.png) Overview
 -----
@@ -24,7 +23,7 @@ Mittens is a generic header-only library that allows try-catch statement composi
 
 auto handleIt = mittens::all_catcher               (-1, []()       { std::cerr << "Caught exception of unknown type!"   << std::endl; }, 
                    mittens::std_exception_handler  (-2, [](auto& e){ std::cerr << "Caught std::exception: " << e.what() << std::endl; },
-                      mittens::generic_handler<int>(-3, [](auto& e){ std::cerr << "Caught thrown `int` = " << e << std::endl; })));
+                      mittens::generic_handler<int>(-3, [](auto& e){ std::cerr << "Caught thrown `int` = "  << e        << std::endl; })));
 
 int main() try
 {
@@ -50,6 +49,4 @@ Application prints: `Caught std::exception: Goodbye World, Hello Mittens!` and t
 - Although the design is very different, Mittens was originally inspired by Matthew Wilson's Quality Matters articles ([QM#6](http://accu.org/index.php/journals/1706), [QM#7](http://accu.org/index.php/articles/1868)).  
 - Check out the `examples` folder for more examples of how Mittens can help you and more advanced usage.
 - Comments, discussions, questions, ideas and PRs are most welcome!
-
-
 
