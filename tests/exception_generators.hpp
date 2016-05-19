@@ -29,10 +29,10 @@ inline void throw_std_exception()
    throw std::logic_error("std::exception!");
 }
 
-inline void throw_seh_exception()
-{
-   *(int*)(0) = 0;
-}
+//inline void throw_seh_exception()
+//{
+//   *(int*)(0) = 0;
+//}
 
 // inline void throw_AfxThrowMemoryException()
 // {
