@@ -31,11 +31,6 @@ namespace mittens
 
 
    //////////////////////////////////////////////////////////////////////////
-   // Helper utils
-   namespace
-   {
-      template <bool v> struct Bool2Type { static const bool value = v; };  // anonymous helper function
-   }
 
    // Helper default no-action type
    template <typename ExceptionType = void>
@@ -61,14 +56,14 @@ namespace mittens
          supressExceptionsInAction_(supressExceptionsInAction)
       {}
 
-      FailCodeType handleException() { return handleException_(Bool2Type<std::is_same<ExceptionType, void>::value>()); }
+      FailCodeType handleException() { return handleException_(std::is_same<ExceptionType, void>::type{}); }
       FailCodeType operator()() { return handleException(); }
 
    private:
       //////////////////////////////////////////////////////////////////////////
       // What follows is lots of code and compile-time trickery to work-around 
       // partial support for template specialization in VS2010
-      FailCodeType handleException_(Bool2Type<false> exceptionTypeNotVoid)
+      FailCodeType handleException_(std::false_type exceptionTypeNotVoid)
       {
          // Handle the case of ExceptionType != void
          // This means 'e' can and needs to be passed to the custom-action (if the exception is caught)
@@ -80,13 +75,13 @@ namespace mittens
          {
             // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
             // then return the result of custom action as the fail code.
-            auto shouldReturnActionResult = Bool2Type< std::is_same< FailCodeType, decltype(customAction_(e)) >::value>();
+            auto shouldReturnActionResult = std::is_same< FailCodeType, decltype(customAction_(e)) >::type{};
             return handleNonVoidExceptionType(shouldReturnActionResult);
             e; // prevent unused variable warning. 'e' is used inside the decltype, but nowhere else (except here...)
          }
       }
 
-      FailCodeType handleException_(Bool2Type<true> exceptionTypeIsVoid)
+      FailCodeType handleException_(std::true_type exceptionTypeIsVoid)
       {
          // Handle the case of ExceptionType == void: Interpret this as catch-all: '...'
          try
@@ -97,24 +92,24 @@ namespace mittens
          {
             // If the return type of the custom action is the same as FailCodeType (as opposed to void or even less plausible something else)
             // then return the result of custom action as the fail code.
-            auto shouldReturnActionResult = Bool2Type< std::is_same< FailCodeType, decltype(customAction_()) >::value>();
+            auto shouldReturnActionResult = std::is_same< FailCodeType, decltype(customAction_())>::type{};
             return handleVoidExceptionType(shouldReturnActionResult);
          }
       }
 
-      FailCodeType handleVoidExceptionType(Bool2Type<true> shouldReturnFromCustomAction)
+      FailCodeType handleVoidExceptionType(std::true_type shouldReturnFromCustomAction)
       {
          try { return customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
-      FailCodeType handleVoidExceptionType(Bool2Type<false> shouldReturnFromCustomAction)
+      FailCodeType handleVoidExceptionType(std::false_type shouldReturnFromCustomAction)
       {
          try { customAction_(); } catch (...) { if (!supressExceptionsInAction_) throw; } // Run custom action. Force it no-throw by suppressing any exceptions or not.
          return failCode_;
       }
 
-      FailCodeType handleNonVoidExceptionType(Bool2Type<true> shouldReturnFromCustomAction)
+      FailCodeType handleNonVoidExceptionType(std::true_type shouldReturnFromCustomAction)
       {
          try 
          { 
@@ -130,7 +125,7 @@ namespace mittens
          return failCode_;
       }
 
-      FailCodeType handleNonVoidExceptionType(Bool2Type<false> shouldReturnFromCustomAction)
+      FailCodeType handleNonVoidExceptionType(std::false_type shouldReturnFromCustomAction)
       {
          try 
          { 
