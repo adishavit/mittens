@@ -20,6 +20,10 @@ set_property(TARGET 3_lippincott_blog_post_example PROPERTY FOLDER "examples/gen
 add_executable (4_multi_catch 4_multi_catch.cpp)
 set_property(TARGET 4_multi_catch PROPERTY FOLDER "examples/general")
 
+add_executable (5_handler_from_function 5_handler_from_function.cpp)
+set_property(TARGET 5_handler_from_function PROPERTY FOLDER "examples/general")
+
+
 if(MSVC)
 	add_executable (1_win32_hresult_boundary_function_example 1_win32_hresult_boundary_function_example.cpp)
 	set_property(TARGET 1_win32_hresult_boundary_function_example PROPERTY FOLDER "examples/windows")
